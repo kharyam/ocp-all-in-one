@@ -1,0 +1,629 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: pqc-support
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: sonarqube-custom
+    name: sonarqube-custom
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: sonarqube-custom:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      dockerStrategy: {}
+      type: Docker
+    triggers:
+    - github:
+        secret: Of8lNQXMyWXDzvkKGSyD
+      type: GitHub
+    - generic:
+        secret: AHRv1WxGhSJGttxEuLPM
+      type: Generic
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    tags:
+    - annotations:
+        openshift.io/imported-from: docker.io/gogs/gogs
+      from:
+        kind: DockerImage
+        #name: docker-registry.default.svc.cluster.local:5000/pqc-support/gogs:latest
+        name: docker.io/gogs/gogs
+      #generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: nexus
+    name: nexus
+  spec:
+    tags:
+    - annotations:
+        openshift.io/imported-from: docker.io/sonatype/nexus3
+      from:
+        kind: DockerImage
+        name: docker.io/sonatype/nexus3
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: sonarqube-custom
+    name: sonarqube-custom
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc.cluster.local:5000/pqc-support/sonarqube-custom:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    replicas: 1
+    selector:
+      app: gogs
+      deploymentconfig: gogs
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: gogs
+          deploymentconfig: gogs
+      spec:
+        containers:
+        - image: docker.io/gogs/gogs@sha256:db634c1c2a4a5ee329528f86fc02e1a1df61c2e4f2f20d726812a634ceeea780
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: gogs
+          ports:
+          - containerPort: 22
+            protocol: TCP
+          - containerPort: 3000
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /data
+            name: gogs-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: gogs-volume-1
+          persistentVolumeClaim:
+            claimName: pvc-gogs
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - gogs
+        from:
+          kind: ImageStreamTag
+          name: gogs:latest
+          namespace: pqc-support
+      type: ImageChange
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    name: "pvc-gogs"
+  spec:
+    accessModes:
+      - "ReadWriteMany"
+    resources:
+      requests:
+        storage: "1Gi"
+# - apiVersion: v1
+#   kind: DeploymentConfig
+#   metadata:
+#     annotations:
+#       openshift.io/generated-by: OpenShiftNewApp
+#     creationTimestamp: null
+#     generation: 1
+#     labels:
+#       app: jenkins-persistent
+#       template: jenkins-persistent-template
+#     name: jenkins
+#   spec:
+#     replicas: 0
+#     selector:
+#       name: jenkins
+#     strategy:
+#       activeDeadlineSeconds: 21600
+#       recreateParams:
+#         timeoutSeconds: 600
+#       resources: {}
+#       type: Recreate
+#     template:
+#       metadata:
+#         annotations:
+#           openshift.io/generated-by: OpenShiftNewApp
+#         creationTimestamp: null
+#         labels:
+#           app: jenkins-persistent
+#           name: jenkins
+#       spec:
+#         containers:
+#         - env:
+#           - name: OPENSHIFT_ENABLE_OAUTH
+#             value: "true"
+#           - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+#             value: "true"
+#           - name: KUBERNETES_MASTER
+#             value: https://kubernetes.default:443
+#           - name: KUBERNETES_TRUST_CERTIFICATES
+#             value: "true"
+#           - name: JNLP_SERVICE_NAME
+#             value: jenkins-jnlp
+#           - name: JAVA_GC_OPTS
+#             value: -XX:MaxMetaspaceSize=1024m
+#           image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:2f480e81e85f7d335e630050fa8188b611805483b1bf6b68ccee6351ba530bff
+#           imagePullPolicy: IfNotPresent
+#           livenessProbe:
+#             failureThreshold: 30
+#             httpGet:
+#               path: /login
+#               port: 8080
+#               scheme: HTTP
+#             initialDelaySeconds: 420
+#             periodSeconds: 10
+#             successThreshold: 1
+#             timeoutSeconds: 3
+#           name: jenkins
+#           readinessProbe:
+#             failureThreshold: 3
+#             httpGet:
+#               path: /login
+#               port: 8080
+#               scheme: HTTP
+#             initialDelaySeconds: 3
+#             periodSeconds: 10
+#             successThreshold: 1
+#             timeoutSeconds: 3
+#           resources:
+#             limits:
+#               memory: 2Gi
+#           securityContext:
+#             capabilities: {}
+#             privileged: false
+#           terminationMessagePath: /dev/termination-log
+#           volumeMounts:
+#           - mountPath: /var/lib/jenkins
+#             name: jenkins-data
+#         dnsPolicy: ClusterFirst
+#         restartPolicy: Always
+#         securityContext: {}
+#         serviceAccount: jenkins
+#         serviceAccountName: jenkins
+#         terminationGracePeriodSeconds: 30
+#         volumes:
+#         - name: jenkins-data
+#           persistentVolumeClaim:
+#             claimName: jenkins
+#     test: false
+#     triggers:
+#     - imageChangeParams:
+#         automatic: true
+#         containerNames:
+#         - jenkins
+#         from:
+#           kind: ImageStreamTag
+#           name: jenkins:latest
+#           namespace: openshift
+#       type: ImageChange
+#     - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: nexus
+    name: nexus
+  spec:
+    replicas: 1
+    selector:
+      app: nexus
+      deploymentconfig: nexus
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: nexus
+          deploymentconfig: nexus
+      spec:
+        containers:
+        - image: docker.io/sonatype/nexus3:latest
+          imagePullPolicy: Always
+          env:
+          - name: INSTALL4J_ADD_VM_PARAMS
+            value: "-Xms1024m -Xmx1024m -XX:MaxDirectMemorySize=1024m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: nexus
+          ports:
+          - containerPort: 8081
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /sonatype-work
+            name: nexus-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: nexus-volume-1
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - nexus
+        from:
+          kind: ImageStreamTag
+          name: nexus:latest
+          namespace: pqc-support
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: sonarqube-custom
+    name: sonarqube-custom
+  spec:
+    replicas: 1
+    selector:
+      app: sonarqube-custom
+      deploymentconfig: sonarqube-custom
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: sonarqube-custom
+          deploymentconfig: sonarqube-custom
+      spec:
+        containers:
+        - image: docker-registry.default.svc.cluster.local:5000/pqc-support/sonarqube-custom:latest
+          env:
+          - name: SONARQUBE_WEB_JVM_OPTS
+            value: "-Xms1024m -Xmx1024m -XX:MaxMetaspaceSize=512m"
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: sonarqube-custom
+          ports:
+          - containerPort: 9000
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /opt/sonarqube/data
+            name: sonarqube-custom-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: sonarqube-custom-volume-1
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - sonarqube-custom
+        from:
+          kind: ImageStreamTag
+          name: sonarqube-custom:latest
+          namespace: pqc-support
+      type: ImageChange
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    host: gogs-pqc-support.apps.192.168.124.215.nip.io
+    port:
+      targetPort: 3000
+    to:
+      kind: Service
+      name: gogs
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    host: jenkins-pqc-support.apps.192.168.124.215.nip.io
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: jenkins
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: nexus
+    name: nexus
+  spec:
+    host: nexus-pqc-support.apps.192.168.124.215.nip.io
+    port:
+      targetPort: 8081-tcp
+    to:
+      kind: Service
+      name: nexus
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: sonarqube-custom
+    name: sonarqube-custom
+  spec:
+    host: sonarqube-custom-pqc-support.apps.192.168.124.215.nip.io
+    port:
+      targetPort: 9000-tcp
+    to:
+      kind: Service
+      name: sonarqube-custom
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    ports:
+    - name: 22-tcp
+      port: 22
+      protocol: TCP
+      targetPort: 22
+    - name: 3000-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: gogs
+      deploymentconfig: gogs
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      service.alpha.openshift.io/dependencies: '[{"name": "jenkins-jnlp", "namespace":
+        "", "kind": "Service"}]'
+      service.openshift.io/infrastructure: "true"
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    ports:
+    - name: web
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins-jnlp
+  spec:
+    ports:
+    - name: agent
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: nexus
+    name: nexus
+  spec:
+    ports:
+    - name: 8081-tcp
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+    selector:
+      app: nexus
+      deploymentconfig: nexus
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: sonarqube-custom
+    name: sonarqube-custom
+  spec:
+    ports:
+    - name: 9000-tcp
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+    selector:
+      app: sonarqube-custom
+      deploymentconfig: sonarqube-custom
+    sessionAffinity: None
+    type: ClusterIP

@@ -1,0 +1,63 @@
+######################
+## Post OCP Install ##
+######################
+
+oc env rc/hawkular-cassandra-1 MAX_HEAP_SIZE=512M -n openshift-infra
+oc env rc/hawkular-cassandra-1 NEW_HEAP_SIZE=100M -n openshift-infra
+oc set resources rc/hawkular-metrics --requests=cpu=500m,memory=256Mi --limits=cpu=2000m,memory=1536Mi -n openshift-infra
+oc adm policy add-scc-to-user anyuid -z default -n pqc-support
+
+# Scale down then up cassandra and hawkular metrics pods
+
+# create a pvc called registry-pvc from the UI (default project)
+
+oc volume deploymentconfigs/docker-registry --add --name=registry-storage -t pvc --claim-name=registry-pvc --overwrite
+
+############################
+## Create Jenkins Account ##
+############################
+oc create sa jenkins -n pqc-support
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-dev
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-test
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-prod
+
+################
+## Demo Reset ##
+################
+
+# Run projects.sh
+
+
+##########
+## Misc ##
+##########
+
+# repo Config
+rm -fr .git
+git init
+git add Jenkinsfile.external README.md deployments/ openshift/ pom.xml src/
+git config user.name "Joe Developer"
+git config user.email "jdeveloper@nowhere.com"
+git commit -am "Initial commit"
+git remote add gogs "http://gogs-pqc-support.apps.192.168.124.215.nip.io/developer/person-qualification-calculator.git"
+git push gogs master
+
+============
+
+Possibly play with this:
+docker login registry.connect.redhat.com
+docker pull registry.connect.redhat.com/sonatype/nexus-repository-manager
+
+
+oadm ca create-server-cert \
+    --signer-cert=/etc/origin/master/ca.crt \
+    --signer-key=/etc/origin/master/ca.key \
+    --signer-serial=/etc/origin/master/ca.serial.txt \
+    --hostnames='docker-registry.apps.192.168.124.215.nip.io,docker-registry.default.svc.cluster.local,172.30.157.37' \
+    --cert=/etc/secrets/registry.crt \
+    --key=/etc/secrets/registry.key
+
+=================
+#free up cache
+sudo su -
+free && sync && echo 3 > /proc/sys/vm/drop_caches && free

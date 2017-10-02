@@ -1,0 +1,40 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=openshift
+openshift_hosted_metrics_deploy=true
+openshift_master_default_subdomain=apps.192.168.124.215.nip.io
+openshift_hosted_router_selector='region=primary'
+openshift_hosted_registry_selector='region=primary'
+openshift_disable_check=docker_storage
+openshift_release=3.6
+
+# Enables installation of MIQ server. Recommended for dedicated
+# clusters only. See roles/openshift_cfme/README.md for instructions
+# and requirements.
+#openshift_cfme_install_app=False
+
+# If ansible_ssh_user is not root, ansible_become must be set to true
+ansible_become=true
+
+openshift_deployment_type=openshift-enterprise
+
+# uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# host group for masters
+[masters]
+ocp
+
+# host group for nodes, includes region info
+[nodes]
+ocp openshift_schedulable=true openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[etcd]
+ocp
