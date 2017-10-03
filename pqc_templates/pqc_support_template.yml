@@ -429,6 +429,8 @@ objects:
           volumeMounts:
           - mountPath: /opt/sonarqube/data
             name: sonarqube-custom-volume-1
+          - mountPath: /opt/sonarqube/extensions/plugins
+            name: sonarqube-custom-volume-2
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         securityContext: {}
@@ -436,6 +438,9 @@ objects:
         volumes:
         - emptyDir: {}
           name: sonarqube-custom-volume-1
+        - name: sonarqube-custom-volume-2
+          persistentVolumeClaim:
+            claimName: pvc-sonarqube
     test: false
     triggers:
     - type: ConfigChange
@@ -448,6 +453,16 @@ objects:
           name: sonarqube-custom:latest
           namespace: pqc-support
       type: ImageChange
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    name: "pvc-sonarqube"
+  spec:
+    accessModes:
+      - "ReadWriteMany"
+    resources:
+      requests:
+        storage: "1Gi"
 - apiVersion: v1
   kind: Route
   metadata:

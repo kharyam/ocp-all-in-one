@@ -17,9 +17,9 @@ oc volume deploymentconfigs/docker-registry --add --name=registry-storage -t pvc
 ## Create Jenkins Account ##
 ############################
 oc create sa jenkins -n pqc-support
-oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-dev
-oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-test
-oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-prod
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-support
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-support
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-support
 
 ################
 ## Demo Reset ##
@@ -44,7 +44,7 @@ git push gogs master
 
 ============
 
-Possibly play with this:
+# Couldn't log onto redhat repo
 docker login registry.connect.redhat.com
 docker pull registry.connect.redhat.com/sonatype/nexus-repository-manager
 
@@ -61,3 +61,24 @@ oadm ca create-server-cert \
 #free up cache
 sudo su -
 free && sync && echo 3 > /proc/sys/vm/drop_caches && free
+
+export PROJECT=pqc-support
+oc delete all --selector="build=jenkins-custom" -n ${PROJECT}
+oc delete all --selector="app=jenkins-custom" -n ${PROJECT}
+oc delete sa jenkins -n ${PROJECT}
+
+oc new-build --binary --name=jenkins-custom --image-stream=openshift/jenkins:2 --to=jenkins-custom:latest -n ${PROJECT}
+oc start-build --from-dir=jenkins-ocp bc/jenkins-custom --follow --wait -n ${PROJECT}
+oc new-app jenkins-custom -n ${PROJECT} -e OPENSHIFT_ENABLE_OAUTH=false -e KUBERNETES_MASTER=https://kubernetes.default:443 -e KUBERNETES_TRUST_CERTIFICATES=true -e JNLP_SERVICE_NAME=jenkins-jnlp
+oc policy add-role-to-user edit system:serviceaccount:pqc-support:default -n ${PROJECT}
+oc expose svc/jenkins-custom -n ${PROJECT}
+oc expose service jenkins-custom -n ${PROJECT} --port=50000 --name=jenkins-jnlp
+oc policy add-role-to-user edit system:serviceaccount:jenkins:default -n ${PROJECT}
+
+
+## SCAP ##
+sudo yum install -y atomic openscap openscap-utils openscap-scanner scap-security-guide
+
+# Jenkins
+sudo yum install -y dejavu-sans-fonts fontconfig dejavu-sans-fonts java-1.8.0-openjdk-devel
+Update iptables

@@ -1,0 +1,12 @@
+[Unit]
+Description=Jenkins for CI/CD Demo
+
+[Service]
+Type=simple
+ExecStart=/home/openshift/start-jenkins.sh
+Restart=always
+RestartSec=30
+User=openshift
+
+[Install]
+WantedBy=multi-user.target
