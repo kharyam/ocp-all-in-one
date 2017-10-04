@@ -1,7 +1,20 @@
+# Pre Reqs
 * Need to have jq installed
-* Need PVs available, at least 1Gi, ReadWriteOnce
+* Need PVs available- 1Gi, ReadWriteOnce
+
+# Install
+* Run install.sh
+
+* Enable anyuid scc
+
 oc adm policy add-scc-to-user anyuid -z default -n eclipse-che
 oc adm policy add-scc-to-user anyuid -z che -n eclipse-che
-Need to visit the routes in the OCP console so that the certs can be accepted in the browser.  Same goes for the terminal wss endpoint (when the terminal fails in the browser, open the browser console and click on the wss url to open it up and accept the cert manually)
 
-edit the che config map, set che-openshift-secure-routes and che-secure-external-urls to false
+* Disable https (otherwise workspace will not startup unless you manually visit the workspace routes in the browser and accept the certs)
+edit the che config map:
+
+che-openshift-secure-routes - false
+che-secure-external-urls - false
+che.docker.server_evaluation_strategy.custom.external.protocol - http
+
+Edit the che route to make it insecure, restart the pod
