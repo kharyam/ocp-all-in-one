@@ -1,0 +1,7 @@
+* Need to have jq installed
+* Need PVs available, at least 1Gi, ReadWriteOnce
+oc adm policy add-scc-to-user anyuid -z default -n eclipse-che
+oc adm policy add-scc-to-user anyuid -z che -n eclipse-che
+Need to visit the routes in the OCP console so that the certs can be accepted in the browser.  Same goes for the terminal wss endpoint (when the terminal fails in the browser, open the browser console and click on the wss url to open it up and accept the cert manually)
+
+edit the che config map, set che-openshift-secure-routes and che-secure-external-urls to false

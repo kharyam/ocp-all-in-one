@@ -1,3 +1,12 @@
+#######################
+## OCP Install Notes ##
+#######################
+
+vi /usr/share/ansible/openshift-ansible/roles/openshift_health_checker/openshift_checks/disk_availability.py
+Update the disk check if the VM has less than 40GB storage:
+#            'masters': 40 * 10**9,
+            'masters': 30 * 10**9,
+
 ######################
 ## Post OCP Install ##
 ######################

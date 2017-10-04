@@ -18,14 +18,13 @@ openshift_release=3.6
 # Enables installation of MIQ server. Recommended for dedicated
 # clusters only. See roles/openshift_cfme/README.md for instructions
 # and requirements.
-#openshift_cfme_install_app=False
+#openshift_cfme_install_app=true
 
 # If ansible_ssh_user is not root, ansible_become must be set to true
 ansible_become=true
 
 openshift_deployment_type=openshift-enterprise
 
-# uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # host group for masters

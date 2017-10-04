@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Create PV directories on the vm:
-#mkdir /home/openshift/pvs/pv{00..50}
+#mkdir -p /home/openshift/pvs/pv{000..199}
+#chmod -R 777 /home/openshift/pvs
 #chcon -Rt svirt_sandbox_file_t /home/openshift/pvs
 
-for i in {0..50}
+for i in {000..199}
 do
 printf 'kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: pv%02d
+  name: pv%03d
   labels:
     type: local
 spec:
@@ -19,7 +20,8 @@ spec:
     - ReadWriteMany
     - ReadWriteOnce
   hostPath:
-    path: "/home/openshift/pvs/pv%02d"
+    path: "/home/openshift/pvs/pv%03d"
+  persistentVolumeReclaimPolicy: Recycle
 ' $i $i | oc create -f -
 
 done
