@@ -1,10 +1,4 @@
 #!/bin/bash
-
-# Create PV directories on the vm:
-#mkdir -p /home/openshift/pvs/pv{000..199}
-#chmod -R 777 /home/openshift/pvs
-#chcon -Rt svirt_sandbox_file_t /home/openshift/pvs
-
 for i in {000..199}
 do
 printf 'kind: PersistentVolume
