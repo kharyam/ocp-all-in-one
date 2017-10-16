@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in {000..199}
+for i in {1..200}
 do
 printf 'kind: PersistentVolume
 apiVersion: v1

@@ -8,6 +8,12 @@ oc new-project pqc-dev --display-name "PQC Development Project" || true
 oc new-project pqc-test --display-name "PQC Test Project" || true
 oc new-project pqc-prod --display-name "PQC Production Project" || true
 
+# Wait for registry to start
+while ! oc get pods -n default | grep docker-registry | grep Running
+do
+sleep 1
+done
+
 # Create the PQC Support Project
 oc project pqc-support
 oc delete all --all -n pqc-support

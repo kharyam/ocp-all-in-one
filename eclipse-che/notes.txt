@@ -18,3 +18,19 @@ che-secure-external-urls - false
 che.docker.server_evaluation_strategy.custom.external.protocol - http
 
 Edit the che route to make it insecure, restart the pod
+
+oc adm policy add-scc-to-user privileged system:serviceaccount:eclipse-che:che
+
+edit the dc to add:
+      securityContext:
+        privileged: true 
+
+
+# Run standalone on docker
+docker run -p 8080:8080 \
+           --name che \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /tmp/data:/data:Z \
+           --security-opt label:disable \
+           -e CHE_DOCKER_SERVER__EVALUATION__STRATEGY=docker-local \
+           eclipse/che-server:5.0.0-latest

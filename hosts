@@ -8,12 +8,23 @@ etcd
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=openshift
-openshift_hosted_metrics_deploy=true
 openshift_master_default_subdomain=apps.192.168.124.215.nip.io
+osm_default_node_selector='region=primary'
 openshift_hosted_router_selector='region=primary'
 openshift_hosted_registry_selector='region=primary'
 openshift_disable_check=docker_storage
 openshift_release=3.6
+
+openshift_hosted_metrics_deploy=true
+#openshift_hosted_metrics_duration=7
+#openshift_hosted_metrics_resolution=10s
+
+openshift_hosted_logging_deploy=true
+openshift_logging_es_memory_limit=2Gi
+#openshift_logging_es_pvc_size=10Gi
+#openshift_hosted_logging_elasticsearch_pvc_prefix=pvc-es-
+#openshift_logging_nodeselector="region=infra"
+
 
 # Enables installation of MIQ server. Recommended for dedicated
 # clusters only. See roles/openshift_cfme/README.md for instructions
@@ -26,6 +37,7 @@ ansible_become=true
 openshift_deployment_type=openshift-enterprise
 
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+openshift_master_htpasswd_users={'admin': '$apr1$bdF8YX9p$NeiMV9s1mTyhnSszTBc3a/'}
 
 # host group for masters
 [masters]
