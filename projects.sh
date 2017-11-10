@@ -2,6 +2,14 @@
 
 set -e
 
+# Import latest EAP images
+oc import-image jboss-eap64-openshift -n openshift --all --confirm
+oc import-image jboss-eap70-openshift -n openshift --all --confirm
+
+# Import older image for demo purposes
+oc import-image openshift/jboss-eap70-openshift:1.3 --from=registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.3 --confirm -n openshift
+
+
 # Create projects if they don't exist
 oc new-project pqc-support --display-name "PQC Support Infrastructure" || true
 oc new-project pqc-dev --display-name "PQC Development Project" || true

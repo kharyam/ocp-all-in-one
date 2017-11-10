@@ -1,0 +1,10 @@
+[Unit]
+Description=Cleanup demo OCP Projects
+After=atomic-openshift-master.service
+[Service]
+Type=oneshot
+ExecStart=/home/openshift/projects.sh
+User=openshift
+
+[Install]
+WantedBy=multi-user.target

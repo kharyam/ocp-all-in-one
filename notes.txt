@@ -28,6 +28,7 @@ oc scale rc/hawkular-metrics --replicas=1
 oc volume deploymentconfigs/docker-registry --add --name=registry-storage -t pvc --claim-name=registry-pvc --overwrite
 
 oc import-image openshift/jboss-eap70-openshift:1.3 --from=registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.3 --confirm -n openshift
+oc import-image jboss-eap70-openshift -n openshift --all --confirm
 
 # Mount a PVC for metrics:
 oc volume rc/hawkular-cassandra-1 --overwrite --mount-path=/cassandra_data --type=persistentVolumeClaim --add --claim-size=10Gi --name=cassandra-data -n openshift-infra
