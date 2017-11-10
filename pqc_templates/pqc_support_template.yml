@@ -609,8 +609,8 @@ objects:
             timeoutSeconds: 3
           resources:
             limits:
-              memory: 1536Gi 
-              cpu: 2
+              memory: 1536Mi 
+              cpu: 1
           securityContext:
             capabilities: {}
             privileged: false
