@@ -52,3 +52,4 @@
   <triggers/>
   <authToken>secret</authToken>
   <disabled>false</disabled>
+</flow-definition>
