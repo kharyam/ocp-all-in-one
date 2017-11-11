@@ -610,7 +610,9 @@ objects:
           resources:
             limits:
               memory: 1536Mi 
-              cpu: 1
+              cpu: 2
+            requests:
+              cpu: 500m
           securityContext:
             capabilities: {}
             privileged: false
@@ -721,4 +723,5 @@ objects:
       - "ReadWriteMany"
     resources:
       requests:
-        storage: "1Gi"    
+        storage: "1Gi"
+
