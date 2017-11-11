@@ -1,5 +1,5 @@
 oc create -f is.yml
 oc create -f bc.yml
-oc start-build custom-jenkins-build
+oc start-build custom-jenkins-build --follow --wait
 oc new-app custom-jenkins
 oc expose svc/custom-jenkins
