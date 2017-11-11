@@ -1,0 +1,9 @@
+kind: "PersistentVolumeClaim"
+metadata:
+  name: "maven-cache"
+spec:
+  accessModes:
+    - "ReadWriteMany"
+  resources:
+    requests:
+      storage: "1Gi"
