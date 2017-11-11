@@ -26,7 +26,6 @@ jsch: 0.1.54.1
 workflow-aggregator: 2.5
 scm-api: 2.2.5
 workflow-basic-steps: 2.6
-workflow-cps-global-lib: 2.9
 workflow-durable-task-step: 2.16
 workflow-job: 2.11.2
 workflow-remote-loader: 1.4
