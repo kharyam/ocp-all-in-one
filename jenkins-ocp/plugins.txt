@@ -32,7 +32,6 @@ workflow-support: 2.14
 bouncycastle-api: 2.16.2
 workflow-step-api: 2.13
 branch-api: 2.0.15
-kubernetes: 1.1
 pipeline-input-step: 2.8
 workflow-multibranch: 2.16
 pipeline-build-step: 2.5.1
