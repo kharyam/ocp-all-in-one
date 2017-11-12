@@ -1,6 +1,7 @@
 # Pre Reqs
 * Need to have jq installed
 * Need PVs available- 1Gi, ReadWriteOnce
+* add hostname (ocp) to /etc/hosts   WEIRD!
 
 # Install
 * Run install.sh
@@ -9,6 +10,8 @@
 
 oc adm policy add-scc-to-user anyuid -z default -n eclipse-che
 oc adm policy add-scc-to-user anyuid -z che -n eclipse-che
+oc adm policy add-scc-to-user privileged system:serviceaccount:eclipse-che:che
+
 
 * Disable https (otherwise workspace will not startup unless you manually visit the workspace routes in the browser and accept the certs)
 edit the che config map:
@@ -19,12 +22,12 @@ che.docker.server_evaluation_strategy.custom.external.protocol - http
 
 Edit the che route to make it insecure, restart the pod
 
-oc adm policy add-scc-to-user privileged system:serviceaccount:eclipse-che:che
 
 edit the dc to add:
       securityContext:
         privileged: true 
 
+oc rollout latest che
 
 # Run standalone on docker
 docker run -p 8080:8080 \
