@@ -7,7 +7,7 @@ etcd
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
-ansible_ssh_user=openshift
+ansible_ssh_user=root
 openshift_master_default_subdomain=apps.192.168.124.215.nip.io
 osm_default_node_selector='region=primary'
 openshift_hosted_router_selector='region=primary'
@@ -37,15 +37,17 @@ ansible_become=true
 openshift_deployment_type=openshift-enterprise
 
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# admin/admin
 openshift_master_htpasswd_users={'admin': '$apr1$bdF8YX9p$NeiMV9s1mTyhnSszTBc3a/'}
 
 # host group for masters
 [masters]
-ocp
+ocp37
 
 # host group for nodes, includes region info
 [nodes]
-ocp openshift_schedulable=true openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+ocp37 openshift_schedulable=true openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
 
 [etcd]
-ocp
+ocp37

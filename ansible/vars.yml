@@ -1,0 +1,1 @@
+ocp_byo_playbook: "/usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"

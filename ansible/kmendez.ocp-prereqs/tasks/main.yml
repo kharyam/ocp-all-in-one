@@ -1,0 +1,60 @@
+---
+# tasks file for kmendez.ocp-all-in-one-demo
+- fail: 
+    msg: "{{ ansible_distribution }} {{ ansible_distribution_version }} is not a supported OS"
+  when: ansible_distribution != required_distribution or ansible_distribution_version | version_compare(minimum_distribution_version,'<')
+
+- name: "OpenShift Host Preparation"
+  block:
+#    - name: "Registering..."
+#      redhat_subscription:
+#        state: present
+#        username: "{{ rhsm_user }}"
+#        password: "{{ rhsm_password }}"
+#        pool: '^({{ openshift_pool_string }})$'
+#      tags: register
+
+    - name: "Registering..."
+      shell: "subscription-manager register --username={{ rhsm_user }} --password={{ rhsm_password }}"
+      tags: register
+      ignore_errors: yes
+    - name: Unsubscribe
+      shell: "subscription-manager unsubscribe --all"
+      tags: register      
+    - name: Get Pool ID...
+      shell: "subscription-manager list --available --matches '*OpenShift*' | grep 'Pool ID' | head -1 | awk '{print $3}'"
+      tags: register
+      register: result
+    - name: "Attaching to pool {{ result.stdout }}"
+      shell: 'subscription-manager attach --pool={{ result.stdout }}'
+      tags: register
+
+    - name: "Disable all the enabled RHSM repositories"
+      shell: 'subscription-manager repos --disable="*"'
+      tags: register
+    - name: "Enable OpenShift Repositories"
+      shell: 'subscription-manager repos --enable={{ item }}'
+      with_items: "{{ enabled_repos }}"
+      tags: register
+    - name: Install base packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ openshift_packages }}"
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+    - name: Install Atomic OpenShift Utils
+      yum:
+        name: atomic-openshift-utils
+        state: present
+    - name: Install Docker
+      yum:
+        name: "{{ openshift_docker_package }}"
+        state: present
+    - name: Enable and start docker
+      service:
+        name: docker
+        state: started
+        enabled: yes

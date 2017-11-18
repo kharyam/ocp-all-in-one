@@ -1,0 +1,11 @@
+---
+# tasks file for kmendez.ocp-demo
+- name: "Install / Configure Demo"
+  block:
+    - name: Create OpenShift User
+      user: 
+        name: "{{ openshift_user }}"
+        comment: "OpenShift User"
+        groups: "{{ openshift_user_groups }}"
+        state: present
+        append: yes

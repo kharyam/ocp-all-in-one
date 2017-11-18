@@ -1,0 +1,25 @@
+---
+# vars file for kmendez.ocp-all-in-one-demo
+required_distribution: "RedHat"
+minimum_distribution_version: "7.3"
+rhsm_user: SET_USERNAME_HERE
+rhsm_password: SET_PASSWORD_HERE
+openshift_pool_string: Red Hat OpenShift Container Platform"
+openshift_packages:
+  - wget
+  - git
+  - net-tools
+  - bind-utils
+  - iptables-services
+  - bridge-utils
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - atomic
+enabled_repos:
+  - rhel-7-server-rpms
+  - rhel-7-server-extras-rpms
+  - rhel-7-fast-datapath-rpms
+  - rhel-7-server-ose-3.5-rpms
+openshift_docker_package: "docker-1.12.6"
