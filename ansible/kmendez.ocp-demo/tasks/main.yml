@@ -1,8 +1,11 @@
 ---
 # tasks file for kmendez.ocp-demo
-- name: "Fix dnsmasq networking (Should be fixed in 3.7?)"
+- name: "Get OpenShift Version"
+  shell: oc version | grep 'oc v'
+  register: oc_version
+- name: "Fix dnsmasq networking in OCP 3.6 ({{ oc_version.stdout }})"
   block:
-    - name: Fix 99-origin-dns.sh
+    - name: Fix 99-origin-dns.sh in OCP 3.6 ({{ oc_version.stdout }})
       copy:
         src: 99-origin-dns.sh
         dest: /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
@@ -11,6 +14,7 @@
       service:
         name: network
         state: restarted
+  when: 'oc_version.stdout | search("3.6")'
 
 - name: "Install / Configure Demo"
   block:
@@ -58,14 +62,19 @@
         mode: '0700'
     - name: Creating {{ openshift_num_pvs }} PVs...
       command: /tmp/create_pvs.sh        
-    - name: Limit metrics resources and mount PVC
+    - name: Limit metrics resources
       command: "{{ item }} {{ openshift_creds }} -n openshift-infra"
       with_items:
         - oc env rc/hawkular-cassandra-1 MAX_HEAP_SIZE=512M 
         - oc env rc/hawkular-cassandra-1 NEW_HEAP_SIZE=100M
         - oc set resources rc/hawkular-metrics --requests=cpu=500m,memory=256Mi --limits=cpu=2000m,memory=1536Mi
-        - oc volume rc/hawkular-cassandra-1 --overwrite --mount-path=/cassandra_data --type=persistentVolumeClaim --add --claim-size=10Gi --name=cassandra-data 
       ignore_errors: true
+    - name: Check if PVC was created for metrics
+      shell: oc get pvc -n openshift-infra {{ openshift_creds }} | grep -v "No resources"
+      register: pvc_exists
+    - name: Bind PVC for metrics, if not bound
+      command: oc volume rc/hawkular-cassandra-1 --overwrite --mount-path=/cassandra_data --type=persistentVolumeClaim --add --claim-size=10Gi --name=cassandra-data {{ openshift_creds }} -n openshift-infra
+      when: pvc_exists.rc != 0
     - name: Restart cassandra / metrics
       command: "{{ item }} {{ openshift_creds }} -n openshift-infra"
       with_items:      
@@ -135,4 +144,4 @@
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
       ignore_errors: true
 
-        #TODO - fix/configure jenkins, configure gogs, install eclipse che
+        #TODO - validate registry/logging pvc, fix/configure jenkins, configure gogs, install eclipse che, fix routes in templates

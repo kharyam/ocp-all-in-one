@@ -4,7 +4,7 @@ required_distribution: "RedHat"
 minimum_distribution_version: "7.3"
 rhsm_user: SET_USERNAME_HERE
 rhsm_password: SET_PASSWORD_HERE
-openshift_pool_string: Red Hat OpenShift Container Platform"
+openshift_pool_string: "Red Hat OpenShift Container Platform"
 openshift_packages:
   - wget
   - git
