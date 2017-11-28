@@ -7,7 +7,7 @@ etcd
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
-ansible_ssh_user=root
+ansible_ssh_user=admin
 openshift_master_default_subdomain=apps.192.168.124.215.nip.io
 osm_default_node_selector='region=primary'
 openshift_hosted_router_selector='region=primary'

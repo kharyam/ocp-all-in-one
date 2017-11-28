@@ -2,3 +2,5 @@
 # vars file for kmendez.ocp-demo
 openshift_user: "openshift"
 openshift_user_groups: "docker, wheel"
+openshift_creds: "--config=/etc/origin/master/openshift-master.kubeconfig"
+openshift_num_pvs: 100

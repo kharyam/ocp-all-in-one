@@ -6,6 +6,14 @@
 
 - name: "OpenShift Host Preparation"
   block:
+    - name: "Unregistering"
+      shell: "subscription-manager unregister"
+      tags: register
+      ignore_errors: true
+    - name: "Cleaning"
+      shell: "subscription-manager clean"
+      tags: register  
+      
 #    - name: "Registering..."
 #      redhat_subscription:
 #        state: present
@@ -14,10 +22,9 @@
 #        pool: '^({{ openshift_pool_string }})$'
 #      tags: register
 
-    - name: "Registering..."
+    - name: "Registering"
       shell: "subscription-manager register --username={{ rhsm_user }} --password={{ rhsm_password }}"
       tags: register
-      ignore_errors: yes
     - name: Unsubscribe
       shell: "subscription-manager unsubscribe --all"
       tags: register      

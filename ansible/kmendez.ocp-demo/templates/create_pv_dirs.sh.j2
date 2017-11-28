@@ -1,0 +1,8 @@
+#!/bin/bash
+# Run as openshift user
+su {{ openshift_user  }} 
+
+PV_HOME=/home/{{ openshift_user }}/pvs
+mkdir -p $PV_HOME/pv{001..{{ openshift_num_pvs }}}
+chmod -R 777 $PV_HOME
+chcon -Rt svirt_sandbox_file_t $PV_HOME

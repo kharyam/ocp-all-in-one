@@ -1,11 +1,138 @@
 ---
 # tasks file for kmendez.ocp-demo
+- name: "Fix dnsmasq networking (Should be fixed in 3.7?)"
+  block:
+    - name: Fix 99-origin-dns.sh
+      copy:
+        src: 99-origin-dns.sh
+        dest: /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+        backup: yes
+    - name: Restart networking
+      service:
+        name: network
+        state: restarted
+
 - name: "Install / Configure Demo"
   block:
-    - name: Create OpenShift User
+    - name: Grant cluster admin to admin user
+      command: "oc adm policy add-cluster-role-to-user cluster-admin admin {{ openshift_creds }}"
+    - name: Create docker group
+      group:
+        name: docker
+        state: present
+    - name: Create OpenShift User ( {{ openshift_user }} )
       user: 
         name: "{{ openshift_user }}"
         comment: "OpenShift User"
         groups: "{{ openshift_user_groups }}"
         state: present
         append: yes
+    - name: Create Kube Ops View project
+      command: "oc new-project ocp-ops-view {{ openshift_creds }}"
+      register: kube_ops
+      ignore_errors: true
+    - name: Initialize Kube Ops View Project
+      command: "{{ item }} {{ openshift_creds }} -n ocp-ops-view"
+      with_items:
+        - oc create sa kube-ops-view
+        - oc adm policy add-scc-to-user anyuid -z kube-ops-view
+        - oc adm policy add-cluster-role-to-user cluster-admin -z kube-ops-view
+        - oc apply -f https://raw.githubusercontent.com/raffaelespazzoli/kube-ops-view/ocp/deploy-openshift/kube-ops-view.yaml
+        - oc expose svc kube-ops-view        
+      when: kube_ops.rc == 0
+    - name: Copy PV directory creation script
+      template:
+        src: create_pv_dirs.sh.j2
+        dest: /tmp/create_pv_dirs.sh
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Create PV directories
+      command: /tmp/create_pv_dirs.sh
+    - name: Copy PV creation script
+      template:
+        src: create_pvs.sh.j2
+        dest: /tmp/create_pvs.sh
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Creating {{ openshift_num_pvs }} PVs...
+      command: /tmp/create_pvs.sh        
+    - name: Limit metrics resources and mount PVC
+      command: "{{ item }} {{ openshift_creds }} -n openshift-infra"
+      with_items:
+        - oc env rc/hawkular-cassandra-1 MAX_HEAP_SIZE=512M 
+        - oc env rc/hawkular-cassandra-1 NEW_HEAP_SIZE=100M
+        - oc set resources rc/hawkular-metrics --requests=cpu=500m,memory=256Mi --limits=cpu=2000m,memory=1536Mi
+        - oc volume rc/hawkular-cassandra-1 --overwrite --mount-path=/cassandra_data --type=persistentVolumeClaim --add --claim-size=10Gi --name=cassandra-data 
+      ignore_errors: true
+    - name: Restart cassandra / metrics
+      command: "{{ item }} {{ openshift_creds }} -n openshift-infra"
+      with_items:      
+        - oc scale rc/hawkular-cassandra-1 --replicas=0 
+        - oc scale rc/hawkular-metrics --replicas=0
+        - oc scale rc/hawkular-cassandra-1 --replicas=1
+        - oc scale rc/hawkular-metrics --replicas=1 
+    - name: Grant anyuid to pqc-support project
+      command: oc adm policy add-scc-to-user anyuid -z default -n pqc-support {{ openshift_creds }}
+    - name: Copy registy PVC creation file
+      copy:
+        src: registry-pvc.yml
+        dest: /tmp/registry-pvc.yml
+    - name: Create PVC for registry
+      command: oc create -f /tmp/registry-pvc.yml {{ openshift_creds }} -n default
+      ignore_errors: true
+    - name: Attach PVC for registry
+      command: oc volume deploymentconfigs/docker-registry --add --name=registry-storage -t pvc --claim-name=registry-pvc --overwrite -n default {{ openshift_creds }}
+      ignore_errors: true
+    - name: Get DC for logging      
+      shell: "oc get dc -n logging {{ openshift_creds }} | grep logging-es | awk '{print $1}'"
+      register: logging_dc
+    - name: Attach PVC for logging ( {{ logging_dc.stdout }} )
+      command: "oc volume dc/{{ logging_dc.stdout }} --add --name=elasticsearch-storage -t pvc --claim-name=logging-es-1 --overwrite {{ openshift_creds }} -n logging"
+      ignore_errors: true
+    - name: Copy demo service file
+      template:
+        src: demo.service.j2
+        dest: /etc/systemd/system/demo.service
+    - name: Copy project initialization file
+      template:
+        src: projects.sh.j2
+        dest: /home/{{ openshift_user }}/projects.sh
+        owner: "{{ openshift_user }}"
+        group: "{{ openshift_user }}"
+        mode: '0700'
+    - name: Copy PQC Template Files
+      copy:
+        src: "{{ item }}"
+        dest: /home/{{ openshift_user }}/pqc_templates/
+        owner: "{{ openshift_user }}"
+        group: "{{ openshift_user }}"
+        mode: '0664'
+      with_fileglob:
+        - pqc_templates/*
+    - name: Create SonarQube Directory
+      file:
+        path: "/home/{{ openshift_user }}/sonarqube"
+        state: directory
+    - name: Copy SonarQube Docker File
+      copy:
+        src: sonarqube/Dockerfile
+        dest: "/home/{{ openshift_user }}/sonarqube/Dockerfile"
+    - name: Reload services (just in case)
+      command: systemctl daemon-reload
+    - name: Enable and start demo service
+      service:
+        name: demo
+        state: started
+        enabled: yes
+    - name: Create demo jenkins account
+      command: "{{ item }} {{ openshift_creds }} -n pqc-support"
+      with_items:
+        - oc create sa jenkins
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
+      ignore_errors: true
+
+        #TODO - fix/configure jenkins, configure gogs, install eclipse che
