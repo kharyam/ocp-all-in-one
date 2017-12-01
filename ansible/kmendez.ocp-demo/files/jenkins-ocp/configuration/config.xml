@@ -152,8 +152,7 @@
         </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
       </templates>
       <serverUrl>https://172.30.0.1:443</serverUrl>
-      <serverCertificate>
-      </serverCertificate>
+      <serverCertificate>UNUSED</serverCertificate>
       <skipTlsVerify>true</skipTlsVerify>
       <namespace>pqc-support</namespace>
       <jenkinsUrl>http://custom-jenkins.pqc-support:8080</jenkinsUrl>
