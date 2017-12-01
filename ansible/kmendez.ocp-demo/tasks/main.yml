@@ -72,6 +72,7 @@
     - name: Check if PVC was created for metrics
       shell: oc get pvc -n openshift-infra {{ openshift_creds }} | grep -v "No resources"
       register: pvc_exists
+      ignore_errors: true
     - name: Bind PVC for metrics, if not bound
       command: oc volume rc/hawkular-cassandra-1 --overwrite --mount-path=/cassandra_data --type=persistentVolumeClaim --add --claim-size=10Gi --name=cassandra-data {{ openshift_creds }} -n openshift-infra
       when: pvc_exists.rc != 0
@@ -128,6 +129,15 @@
       copy:
         src: sonarqube/Dockerfile
         dest: "/home/{{ openshift_user }}/sonarqube/Dockerfile"
+    - name:  Copy Custom Jenkins Instance Files
+      copy:
+        src: "{{ item }}"
+        dest: /home/{{ openshift_user }}/ocp-jenkins
+        owner: "{{ openshift_user }}"
+        group: "{{ openshift_user }}"
+        mode: '0664'
+      with_fileglob:
+        - jenkins-ocp/*        
     - name: Reload services (just in case)
       command: systemctl daemon-reload
     - name: Enable and start demo service
@@ -143,5 +153,4 @@
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
       ignore_errors: true
-
         #TODO - validate registry/logging pvc, fix/configure jenkins, configure gogs, install eclipse che, fix routes in templates

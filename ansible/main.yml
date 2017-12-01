@@ -6,9 +6,11 @@
 #  - name: "OpenShift Pre Reqs"
 #    include_role:
 #      name: kmendez.ocp-prereqs
+
 #  - name: "Install OCP"
 #    include: "{{ ocp_byo_playbook }}"
 #    tags: install-ocp
+
   - name: "Install Demo"
     include_role:
       name: kmendez.ocp-demo

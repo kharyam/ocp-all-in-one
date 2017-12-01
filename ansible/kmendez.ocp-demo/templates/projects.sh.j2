@@ -28,34 +28,46 @@ if oc get pvc -n pqc-support {{ openshift_creds }} | grep jenkins
 then
 JENKINS_PV=$(oc get pvc -n pqc-support {{ openshift_creds }} | grep jenkins | awk '{print $3}')
 JENKINS_PV_DIR=/home/openshift/pvs/${JENKINS_PV}
-sudo chmod 777 ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/nextBuildNumber
-echo 1 > ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/nextBuildNumber
-sudo rm -fr ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/builds/*
+sudo chmod 777 ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/nextBuildNumber || true
+echo 1 > ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/nextBuildNumber || true
+sudo rm -fr ${JENKINS_PV_DIR}/jobs/Personal\ Qualification\ Calculator/builds/* || true
 else
 echo "Jenkins PVC does not exist yet"
 fi
 
 # Create the PQC Support Project
-oc delete all --all -n pqc-support {{ openshift_creds }}
+oc delete all --all -n pqc-support {{ openshift_creds }} || true
 oc delete template pqc-support -n pqc-support {{ openshift_creds }} || true
-oc create -f pqc_templates/pqc_support_template.yml -n pqc-support {{ openshift_creds }}
+oc create -f pqc_templates/pqc_support_template.yml -n pqc-support {{ openshift_creds }} || true
 oc new-app --template=pqc-support -n pqc-support {{ openshift_creds }} || true
 oc start-build --from-file=./sonarqube/Dockerfile bc/sonarqube-custom --follow --wait --namespace=pqc-support {{ openshift_creds }}
+oc expose svc/gogs --port=3000 -n pqc-support
+oc expose svc/nexus -n pqc-support
+oc expose svc/sonarqube-custom -n pqc-support
+
+oc create -f ocp-jenkins/is.yml -n pqc-support {{ openshift_creds }} || true
+oc create -f ocp-jenkins/bc.yml -n pqc-support {{ openshift_creds }} || true
+oc start-build custom-jenkins-build --follow --wait {{ openshift_creds }} -n pqc-support
+oc new-app custom-jenkins -n pqc-support {{ openshift_creds }} 
+oc expose svc/custom-jenkins --port=8080 -n pqc-support {{ openshift_creds }} 
+oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhdson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
+
 
 # Create the PQC Development Project
-oc delete all --all -n pqc-dev {{ openshift_creds }}
+oc delete all --all -n pqc-dev {{ openshift_creds }} || true
 oc delete template pqc-dev -n pqc-dev {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_dev_template.yml -n pqc-dev {{ openshift_creds }}
 oc new-app --template=pqc-dev -n pqc-dev {{ openshift_creds }} || true
 
 # Create the PQC Test Project
-oc delete all --all -n pqc-test {{ openshift_creds }}
+oc delete all --all -n pqc-test {{ openshift_creds }} || true
 oc delete template pqc-test -n pqc-test {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_test_template.yml -n pqc-test {{ openshift_creds }}
 oc new-app --template=pqc-test -n pqc-test {{ openshift_creds }} || true
 
 # Create the PQC Production Project
-oc delete all --all -n pqc-prod {{ openshift_creds }}
+oc delete all --all -n pqc-prod {{ openshift_creds }} || true
 oc delete template pqc-prod -n pqc-prod {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_prod_template.yml -n pqc-prod {{ openshift_creds }}
 oc new-app --template=pqc-prod -n pqc-prod {{ openshift_creds }} || true
+

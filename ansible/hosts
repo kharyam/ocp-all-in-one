@@ -8,12 +8,12 @@ etcd
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=admin
-openshift_master_default_subdomain=apps.192.168.124.215.nip.io
+openshift_master_default_subdomain=apps.192.168.124.100.xip.io
 osm_default_node_selector='region=primary'
 openshift_hosted_router_selector='region=primary'
 openshift_hosted_registry_selector='region=primary'
 openshift_disable_check=docker_storage
-openshift_release=3.6
+openshift_release=3.7
 
 openshift_hosted_metrics_deploy=true
 #openshift_hosted_metrics_duration=7
