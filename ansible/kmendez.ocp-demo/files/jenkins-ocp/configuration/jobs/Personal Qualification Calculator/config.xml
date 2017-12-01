@@ -33,7 +33,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>http://gogs-pqc-support.apps.192.168.124.215.nip.io/developer/person-qualification-calculator.git</url>
+          <url>http://gogs.pqc-support:3000/developer/person-qualification-calculator.git</url>
           <credentialsId>GOGS_Developer</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>

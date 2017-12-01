@@ -172,8 +172,8 @@ tYCr2Ov1K/zYKD732BSkcAQsJgsADew2h0BMERM9
 -----END CERTIFICATE-----</serverCertificate>
       <skipTlsVerify>false</skipTlsVerify>
       <namespace>pqc-support</namespace>
-      <jenkinsUrl>http://jenkins.pqc-support:80</jenkinsUrl>
-      <jenkinsTunnel>jenkins-jnlp.pqc-support:50000</jenkinsTunnel>
+      <jenkinsUrl>http://jenkins-custom.pqc-support:80</jenkinsUrl>
+      <jenkinsTunnel>jenkins-custom.pqc-support:50000</jenkinsTunnel>
       <credentialsId>1a12dfa4-7fc5-47a7-aa17-cc56572a41c7</credentialsId>
       <containerCap>10</containerCap>
       <retentionTimeout>5</retentionTimeout>

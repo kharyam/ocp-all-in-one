@@ -132,7 +132,7 @@
     - name:  Copy Custom Jenkins Instance Files
       copy:
         src: "{{ item }}"
-        dest: /home/{{ openshift_user }}/ocp-jenkins
+        dest: /home/{{ openshift_user }}/ocp-jenkins/
         owner: "{{ openshift_user }}"
         group: "{{ openshift_user }}"
         mode: '0664'
