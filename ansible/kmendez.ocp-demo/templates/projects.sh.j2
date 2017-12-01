@@ -5,8 +5,8 @@ set -e
 cd ~{{ openshift_user }}
 
 # Import latest EAP images
-oc import-image jboss-eap64-openshift -n openshift --all --confirm {{ openshift_creds }}
-oc import-image jboss-eap70-openshift -n openshift --all --confirm {{ openshift_creds }}
+oc import-image jboss-eap64-openshift -n openshift --all --from=registry.access.redhat.com/jboss-eap-6/eap64-openshift --confirm {{ openshift_creds }}
+oc import-image jboss-eap70-openshift -n openshift --all --from=registry.access.redhat.com/jboss-eap-7/eap70-openshift --confirm {{ openshift_creds }}
 
 # Import older image for demo purposes
 oc import-image openshift/jboss-eap70-openshift:1.3 --from=registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.3 --confirm -n openshift {{ openshift_creds }} || true
@@ -50,7 +50,8 @@ oc create -f ocp-jenkins/bc.yml -n pqc-support {{ openshift_creds }} || true
 oc start-build custom-jenkins-build --follow --wait {{ openshift_creds }} -n pqc-support
 oc new-app custom-jenkins -n pqc-support {{ openshift_creds }} 
 oc expose svc/custom-jenkins --port=8080 -n pqc-support {{ openshift_creds }} 
-oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhdson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
+oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhudson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
+oc adm policy add-role-to-user edit -z default -n pqc-support {{ openshift_creds }}
 
 
 # Create the PQC Development Project
@@ -58,16 +59,24 @@ oc delete all --all -n pqc-dev {{ openshift_creds }} || true
 oc delete template pqc-dev -n pqc-dev {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_dev_template.yml -n pqc-dev {{ openshift_creds }}
 oc new-app --template=pqc-dev -n pqc-dev {{ openshift_creds }} || true
+oc delete route pqc-dev {{ openshift_creds }} -n pqc-dev || true
+oc expose svc/pqc-dev {{ openshift_creds }} -n pqc-dev
 
 # Create the PQC Test Project
 oc delete all --all -n pqc-test {{ openshift_creds }} || true
 oc delete template pqc-test -n pqc-test {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_test_template.yml -n pqc-test {{ openshift_creds }}
 oc new-app --template=pqc-test -n pqc-test {{ openshift_creds }} || true
+oc delete route pqc-test {{ openshift_creds }} -n pqc-test || true
+oc expose svc/pqc-test {{ openshift_creds }} -n pqc-test
+
 
 # Create the PQC Production Project
 oc delete all --all -n pqc-prod {{ openshift_creds }} || true
 oc delete template pqc-prod -n pqc-prod {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_prod_template.yml -n pqc-prod {{ openshift_creds }}
 oc new-app --template=pqc-prod -n pqc-prod {{ openshift_creds }} || true
+oc delete route pqc-prod {{ openshift_creds }} -n pqc-prod || true
+oc expose svc/pqc-prod {{ openshift_creds }} -n pqc-prod
+
 

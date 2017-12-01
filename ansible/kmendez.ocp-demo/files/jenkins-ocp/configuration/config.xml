@@ -152,28 +152,12 @@
         </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
       </templates>
       <serverUrl>https://172.30.0.1:443</serverUrl>
-      <serverCertificate>-----BEGIN CERTIFICATE-----
-MIIC6jCCAdKgAwIBAgIBATANBgkqhkiG9w0BAQsFADAmMSQwIgYDVQQDDBtvcGVu
-c2hpZnQtc2lnbmVyQDE1MDY2MzQ5NjcwHhcNMTcwOTI4MjE0MjQ2WhcNMjIwOTI3
-MjE0MjQ3WjAmMSQwIgYDVQQDDBtvcGVuc2hpZnQtc2lnbmVyQDE1MDY2MzQ5Njcw
-ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCZApF2XlF5k6vz5xR3oS2e
-42GrfSb6wTe5xCISy2AXcJvKXBP97I3qJtP6FEXqc7iJzKKUwDKv68ZLU2a9p3nS
-myiEUgFRAkvWiCdlR9pKHnJVuEdgNgKwqoNABLwdr3CMAPxyEAPA/gCF9ymXcw8G
-34E+y7e6ScgJcn9PIPV3fnMO6TR0Q0Qc3neKkNr0MyD5hJQGGukTA+HXR1meU4HW
-qrf5zuKwYFTrJ3fl33ZW3mv0QkBSlUqGhKWsYFxZI1/xjLHOQcdwsPg5vBV7DGtM
-g+Hr+xgs9qPGvCwfRNN3+8BaLul5zzNFP7dsnzMEpe0QoBc8AK5ZbDT6Vcf698PR
-AgMBAAGjIzAhMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MA0GCSqG
-SIb3DQEBCwUAA4IBAQA79eiNCceLY3Qblk2YFJ8w78akt0DJlqiYK1U+nUaMTMrc
-KvKygv43zKX8LonsLFcY0NAbB9+qBB2u5OANxfmTqEuWtZlyf7+6/XFOCjNtHUjc
-1QB5lXVoo/02zA6G15u2Qnkb5hueMBrTmO7MlrEdhQqZS4gwjsuyCov7VH2j+Xtv
-oaBYnf00IhCVOnEpvSG/+A8EMoE5rFvx0UXxv+PgUKRzLHvAcc1C8benULpCxCrE
-hJmNo2TsbE4Qwqz0AbiCvGHmpSUI1NiHkIRJyU1upKb21ptmLbt8Ba41vF6NLfo6
-tYCr2Ov1K/zYKD732BSkcAQsJgsADew2h0BMERM9
------END CERTIFICATE-----</serverCertificate>
-      <skipTlsVerify>false</skipTlsVerify>
+      <serverCertificate>
+      </serverCertificate>
+      <skipTlsVerify>true</skipTlsVerify>
       <namespace>pqc-support</namespace>
-      <jenkinsUrl>http://jenkins-custom.pqc-support:80</jenkinsUrl>
-      <jenkinsTunnel>jenkins-custom.pqc-support:50000</jenkinsTunnel>
+      <jenkinsUrl>http://custom-jenkins.pqc-support:8080</jenkinsUrl>
+      <jenkinsTunnel>custom-jenkins.pqc-support:50000</jenkinsTunnel>
       <credentialsId>1a12dfa4-7fc5-47a7-aa17-cc56572a41c7</credentialsId>
       <containerCap>10</containerCap>
       <retentionTimeout>5</retentionTimeout>

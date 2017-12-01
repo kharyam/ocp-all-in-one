@@ -146,11 +146,28 @@
         state: started
         enabled: yes
     - name: Create demo jenkins account
-      command: "{{ item }} {{ openshift_creds }} -n pqc-support"
+      command: "{{ item }} {{ openshift_creds }}"
       with_items:
-        - oc create sa jenkins
-        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
-        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
-        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-dev
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-test
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-prod
+        - oc adm policy add-scc-to-user privileged -z jenkins -n pqc-support
+        - oc adm policy add-scc-to-user anyuid  -z jenkins -n pqc-support
+        - oc adm policy add-scc-to-user privileged -z default -n pqc-support
+        - oc adm policy add-scc-to-user anyuid  -z default -n pqc-support
       ignore_errors: true
+    - name: Pull Jenkins slave SCAP image
+      git:
+        repo: 'https://github.com/kharyam/jenkins.git'
+        dest: /tmp/scap
+    - name: Login to OCP docker repository
+      shell: oc login https://{{ inventory_hostname }}:8443 -u admin -p admin && docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry.default.svc:5000
+    - name: Build Jenkins slave SCAP image and push into OCP
+      docker_image:
+        path: /tmp/scap/slave-scap
+        dockerfile: Dockerfile.rhel7
+        name: docker-registry.default.svc:5000/openshift/scap-slave:latest
+        tag: latest
+        push: yes
+
         #TODO - validate registry/logging pvc, fix/configure jenkins, configure gogs, install eclipse che, fix routes in templates
