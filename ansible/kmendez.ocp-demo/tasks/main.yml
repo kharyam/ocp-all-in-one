@@ -145,7 +145,7 @@
         name: demo
         state: started
         enabled: yes
-    - name: Create demo jenkins account
+    - name: Update jenkins account
       command: "{{ item }} {{ openshift_creds }}"
       with_items:
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-dev

@@ -1,4 +1,2 @@
-htmlpublisher:latest
-bouncycastle-api:latest
-workflow-step-api:latest
-kubernetes:latest
+htmlpublisher:1.14
+kubernetes:1.1
