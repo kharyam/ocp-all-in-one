@@ -197,7 +197,7 @@
       <serverUrl>https://172.30.0.1:443</serverUrl>
       <skipTlsVerify>true</skipTlsVerify>
       <namespace>pqc-support</namespace>
-      <jenkinsUrl>http://custom-jenkins.pqc-support:80</jenkinsUrl>
+      <jenkinsUrl>http://custom-jenkins.pqc-support:8080</jenkinsUrl>
       <jenkinsTunnel>custom-jenkins.pqc-support:50000</jenkinsTunnel>
       <credentialsId>1a12dfa4-7fc5-47a7-aa17-cc56572a41c7</credentialsId>
       <containerCap>10</containerCap>
