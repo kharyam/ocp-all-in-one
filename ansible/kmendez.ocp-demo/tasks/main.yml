@@ -145,6 +145,9 @@
         name: demo
         state: started
         enabled: yes
+    - name: Attach PV to Jenkins
+      command: oc volume dc/custom-jenkins --add --name=custom-jenkins-volume-1 -t pvc --claim-size=1G --overwrite --claim-name=pvc-jenkins -n pqc-support {{ openshift_creds }}
+      ignore_errors: true
     - name: Update jenkins account
       command: "{{ item }} {{ openshift_creds }}"
       with_items:

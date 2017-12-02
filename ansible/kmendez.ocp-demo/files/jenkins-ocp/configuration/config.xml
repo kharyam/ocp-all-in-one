@@ -4,7 +4,7 @@
     <string>jenkins.CLI</string>
   </disabledAdministrativeMonitors>
   <version>2.73.3</version>
-  <numExecutors>5</numExecutors>
+  <numExecutors>1</numExecutors>
   <mode>NORMAL</mode>
   <useSecurity>true</useSecurity>
   <authorizationStrategy class="hudson.security.GlobalMatrixAuthorizationStrategy">
