@@ -195,24 +195,6 @@
         </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
       </templates>
       <serverUrl>https://172.30.0.1:443</serverUrl>
-      <serverCertificate>-----BEGIN CERTIFICATE-----
-MIIC6jCCAdKgAwIBAgIBATANBgkqhkiG9w0BAQsFADAmMSQwIgYDVQQDDBtvcGVu
-c2hpZnQtc2lnbmVyQDE1MTIxMDAxODIwHhcNMTcxMjAxMDM0OTQxWhcNMjIxMTMw
-MDM0OTQyWjAmMSQwIgYDVQQDDBtvcGVuc2hpZnQtc2lnbmVyQDE1MTIxMDAxODIw
-ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC7rzk3WqDSSKGctBNoTYH4
-l/QGK+qFWLDdc6Qq5XSwiCI6Llbqwor7FqgmEVl/FKB84iztYQsVd9hFOURvd8Lu
-NpAEyDoYhhdpW9viRMma8UVlr9zz7gAqJiLcqi51zHsQyfTcnoEKFeCIo9Z1kBBw
-MC35L61rZ6Q63CydRbay7sxzE5QfNKS4UeCVJqOyNRGdX5hIMbyLV+cukGHmP3Sd
-F9qngbDIOy4cvgkVbNQZfKV8k4Iee1UfiIyt3vLn61RTAH2OPya1frHdXtktF7bs
-Din3Z883+7SYTBimpvP1N2DuhfuJsxy46Ydg8KZEDDc8K1nCkYhCRM+k11VuWfGX
-AgMBAAGjIzAhMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MA0GCSqG
-SIb3DQEBCwUAA4IBAQBz7WqELziUq7NNdGSZfYtZQOD5ahgchr865pOH8YTLMiMV
-mEYtcxlmqRb+g6a2Rw0cu7aulmWVwyik2tHlB2R2LagM261C7XAaKwUC9g94Qutu
-/yhdszDD6MSCK2RbK9FR1IwSIKEvhBEEh0HLIUZlNAQuSJIGYICcbJC2KwT4MpsY
-yzD9CusbMwm9VkN22PCIbrW6MAIMskU0AXibCqGtT2QRjcuGAI5k1sD/9sP/d0Bx
-GBaWuSvgDeuy7WSXK6+T22gc3u3lvWfbW1VttO9LE2s12qsVruZJN3ceEtGIULr1
-9MpdFDo8x/UebEgmkfzTEMBXp9lSE8quAe1AbNJr
------END CERTIFICATE-----</serverCertificate>
       <skipTlsVerify>true</skipTlsVerify>
       <namespace>pqc-support</namespace>
       <jenkinsUrl>http://custom-jenkins.pqc-support:80</jenkinsUrl>
