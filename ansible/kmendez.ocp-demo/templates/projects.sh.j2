@@ -57,7 +57,7 @@ printf "\nWaiting for jenkins pod to start"
 while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep Running
 do
 printf "\n."
-sleep 1
+sleep 2
 done
 printf "started\n"
 
