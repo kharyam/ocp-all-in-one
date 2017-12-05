@@ -215,14 +215,3 @@
 
         #TODO - fix/configure jenkins (install blue ocean, update plugins), configure gogs
         #https://stackoverflow.com/questions/7709993/how-can-i-update-jenkins-plugins-from-the-terminal
-
-##!/bin/bash
-#
-#JENKINS_CLI=/var/lib/jenkins/war/WEB-INF/jenkins-cli.jar
-#
-#UPDATE_LIST=$( java -jar ${JENKINS_CLI} -s http://127.0.0.1:8080/ list-plugins | grep -e ')$' | awk '{ print $1 }' ); 
-#if [ ! -z "${UPDATE_LIST}" ]; then 
-#    echo Updating Jenkins Plugins: ${UPDATE_LIST}; 
-#    java -jar ${JENKINS_CLI} -s http://127.0.0.1:8080/ install-plugin ${UPDATE_LIST};
-#    java -jar ${JENKINS_CLI} -s http://127.0.0.1:8080/ safe-restart;
-#fi
