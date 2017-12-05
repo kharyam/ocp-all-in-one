@@ -4,3 +4,48 @@ openshift_user: "openshift"
 openshift_user_groups: "docker, wheel"
 openshift_creds: "--config=/etc/origin/master/openshift-master.kubeconfig"
 openshift_num_pvs: 100
+jq_download: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+#eclipse_che_version: 5.21.0
+eclipse_che_version: nightly
+demo_logo: |
+  PPPPPPPPPPPPPPPPP        QQQQQQQQQ             CCCCCCCCCCCCC     DDDDDDDDDDDDD                                                                     
+  P::::::::::::::::P     QQ:::::::::QQ        CCC::::::::::::C     D::::::::::::DDD                                                                  
+  P::::::PPPPPP:::::P  QQ:::::::::::::QQ    CC:::::::::::::::C     D:::::::::::::::DD                                                                
+  PP:::::P     P:::::PQ:::::::QQQ:::::::Q  C:::::CCCCCCCC::::C     DDD:::::DDDDD:::::D                                                               
+    P::::P     P:::::PQ::::::O   Q::::::Q C:::::C       CCCCCC       D:::::D    D:::::D     eeeeeeeeeeee       mmmmmmm    mmmmmmm      ooooooooooo   
+    P::::P     P:::::PQ:::::O     Q:::::QC:::::C                     D:::::D     D:::::D  ee::::::::::::ee   mm:::::::m  m:::::::mm  oo:::::::::::oo 
+    P::::PPPPPP:::::P Q:::::O     Q:::::QC:::::C                     D:::::D     D:::::D e::::::eeeee:::::eem::::::::::mm::::::::::mo:::::::::::::::o
+    P:::::::::::::PP  Q:::::O     Q:::::QC:::::C                     D:::::D     D:::::De::::::e     e:::::em::::::::::::::::::::::mo:::::ooooo:::::o
+    P::::PPPPPPPPP    Q:::::O     Q:::::QC:::::C                     D:::::D     D:::::De:::::::eeeee::::::em:::::mmm::::::mmm:::::mo::::o     o::::o
+    P::::P            Q:::::O     Q:::::QC:::::C                     D:::::D     D:::::De:::::::::::::::::e m::::m   m::::m   m::::mo::::o     o::::o
+    P::::P            Q:::::O  QQQQ:::::QC:::::C                     D:::::D     D:::::De::::::eeeeeeeeeee  m::::m   m::::m   m::::mo::::o     o::::o
+    P::::P            Q::::::O Q::::::::Q C:::::C       CCCCCC       D:::::D    D:::::D e:::::::e           m::::m   m::::m   m::::mo::::o     o::::o
+  PP::::::PP          Q:::::::QQ::::::::Q  C:::::CCCCCCCC::::C     DDD:::::DDDDD:::::D  e::::::::e          m::::m   m::::m   m::::mo:::::ooooo:::::o
+  P::::::::P           QQ::::::::::::::Q    CC:::::::::::::::C     D:::::::::::::::DD    e::::::::eeeeeeee  m::::m   m::::m   m::::mo:::::::::::::::o
+  P::::::::P             QQ:::::::::::Q       CCC::::::::::::C     D::::::::::::DDD       ee:::::::::::::e  m::::m   m::::m   m::::m oo:::::::::::oo 
+  PPPPPPPPPP               QQQQQQQQ::::QQ        CCCCCCCCCCCCC     DDDDDDDDDDDDD            eeeeeeeeeeeeee  mmmmmm   mmmmmm   mmmmmm   ooooooooooo   
+                                  Q:::::Q                                                                                                           
+                                    QQQQQQ                                                                                                          
+
+                           SSSSSSSSSSSSSSS                              tttt                                               
+                         SS:::::::::::::::S                          ttt:::t                                               
+                        S:::::SSSSSS::::::S                          t:::::t                                               
+                        S:::::S     SSSSSSS                          t:::::t                                               
+                        S:::::S                eeeeeeeeeeee    ttttttt:::::ttttttt    uuuuuu    uuuuuu ppppp   ppppppppp   
+                        S:::::S              ee::::::::::::ee  t:::::::::::::::::t    u::::u    u::::u p::::ppp:::::::::p  
+                         S::::SSSS          e::::::eeeee:::::eet:::::::::::::::::t    u::::u    u::::u p:::::::::::::::::p 
+                          SS::::::SSSSS    e::::::e     e:::::etttttt:::::::tttttt    u::::u    u::::u pp::::::ppppp::::::p
+                            SSS::::::::SS  e:::::::eeeee::::::e      t:::::t          u::::u    u::::u  p:::::p     p:::::p
+                               SSSSSS::::S e:::::::::::::::::e       t:::::t          u::::u    u::::u  p:::::p     p:::::p
+                                    S:::::Se::::::eeeeeeeeeee        t:::::t          u::::u    u::::u  p:::::p     p:::::p
+                                    S:::::Se:::::::e                 t:::::t    ttttttu:::::uuuu:::::u  p:::::p    p::::::p
+                        SSSSSSS     S:::::Se::::::::e                t::::::tttt:::::tu:::::::::::::::uup:::::ppppp:::::::p
+                        S::::::SSSSSS:::::S e::::::::eeeeeeee        tt::::::::::::::t u:::::::::::::::up::::::::::::::::p 
+                        S:::::::::::::::SS   ee:::::::::::::e          tt:::::::::::tt  uu::::::::uu:::up::::::::::::::pp  
+                         SSSSSSSSSSSSSSS       eeeeeeeeeeeeee            ttttttttttt      uuuuuuuu  uuuup::::::pppppppp    
+                                                                                                        p:::::p            
+                                                                                                        p:::::p            
+                                                                                                       p:::::::p           
+                                                                                                       p:::::::p           
+                                                                                                       p:::::::p           
+                                                                                                       ppppppppp           

@@ -41,9 +41,9 @@ oc delete template pqc-support -n pqc-support {{ openshift_creds }} || true
 oc create -f pqc_templates/pqc_support_template.yml -n pqc-support {{ openshift_creds }} || true
 oc new-app --template=pqc-support -n pqc-support {{ openshift_creds }} || true
 oc start-build --from-file=./sonarqube/Dockerfile bc/sonarqube-custom --follow --wait --namespace=pqc-support {{ openshift_creds }}
-oc expose svc/gogs --port=3000 -n pqc-support
-oc expose svc/nexus -n pqc-support
-oc expose svc/sonarqube-custom -n pqc-support
+oc expose svc/gogs --port=3000 -n pqc-support {{ openshift_creds }}
+oc expose svc/nexus -n pqc-support {{ openshift_creds }}
+oc expose svc/sonarqube-custom -n pqc-support {{ openshift_creds }}
 
 oc create -f ocp-jenkins/is.yml -n pqc-support {{ openshift_creds }} || true
 oc create -f ocp-jenkins/bc.yml -n pqc-support {{ openshift_creds }} || true

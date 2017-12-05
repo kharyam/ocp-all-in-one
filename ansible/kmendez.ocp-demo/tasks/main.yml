@@ -18,6 +18,11 @@
 
 - name: "Install / Configure Demo"
   block:
+    - name: Gratuitous logo
+      debug:
+       msg: "{{ demo_logo.split('\n') }}"
+
+                                                                  
     - name: Grant cluster admin to admin user
       command: "oc adm policy add-cluster-role-to-user cluster-admin admin {{ openshift_creds }}"
     - name: Create docker group
@@ -145,17 +150,21 @@
         name: demo
         state: started
         enabled: yes
-    - name: Attach PV to Jenkins
+    - name: Attach PVC to Jenkins
       command: oc volume dc/custom-jenkins --add --name=custom-jenkins-volume-1 -t pvc --claim-size=1G --overwrite --claim-name=pvc-jenkins -n pqc-support {{ openshift_creds }}
       ignore_errors: true
     - name: Update jenkins account
       command: "{{ item }} {{ openshift_creds }}"
       with_items:
+        - oc create sa jenkins -n pqc-support
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-dev
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-test
         - oc policy add-role-to-user edit system:serviceaccount:pqc-support:jenkins -n pqc-prod
         - oc adm policy add-scc-to-user privileged -z jenkins -n pqc-support
         - oc adm policy add-scc-to-user anyuid  -z jenkins -n pqc-support
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:default -n pqc-dev
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:default -n pqc-test
+        - oc policy add-role-to-user edit system:serviceaccount:pqc-support:default -n pqc-prod
         - oc adm policy add-scc-to-user privileged -z default -n pqc-support
         - oc adm policy add-scc-to-user anyuid  -z default -n pqc-support
       ignore_errors: true
@@ -172,5 +181,36 @@
         name: docker-registry.default.svc:5000/openshift/scap-slave:latest
         tag: latest
         push: yes
+    - name: Copy eclipse che install script
+      template:
+        src: eclipse-che/install.sh.j2
+        dest: /tmp/install.sh
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Install jq
+      get_url: 
+        url: "{{ jq_download }}"
+        dest: /usr/bin/jq
+        mode: 0555
+    - name: Install eclipse che
+      command: /tmp/install.sh
+    - name: Configure eclipse che users
+      command: "{{ item }} {{ openshift_creds }} -n eclipse-che"
+      with_items:
+        - oc adm policy add-scc-to-user anyuid -z default 
+        - oc adm policy add-scc-to-user anyuid -z che
+        - oc adm policy add-scc-to-user privileged -z default
+        - oc adm policy add-scc-to-user privileged -z che
+    - name: Update che config map
+      command: "oc patch cm/che -p '{ \"data\": {\"che-openshift-secure-routes\" : \"false\", \"che-secure-external-urls\": \"false\", \"che.docker.server_evaluation_strategy.custom.external.protocol\": \"http\"} }'"
+    - name: Expose che as http
+      command: "{{ item }} -n eclipse-che {{ openshift_creds }}"
+      with_items:
+        - oc delete route che
+        - oc expose svc/che-host --name=che --hostname=che-eclipse-che.apps.{{ ansible_default_ipv4.address }}.xip.io
+      ignore_errors: true
+    - name: Patch che DC, set SCC privileged to true
+      command: "oc patch dc/che --patch='{\"spec\": {\"template\": {\"spec\": {\"containers\": [  {\"name\":\"che\",\"securityContext\": { \"privileged\": true }}]}}}}' -n eclipse-che {{ openshift_creds }}"
 
-        #TODO - validate registry/logging pvc, fix/configure jenkins, configure gogs, install eclipse che, fix routes in templates
+        #TODO - fix/configure jenkins (install blue ocean, update plugins), configure gogs
