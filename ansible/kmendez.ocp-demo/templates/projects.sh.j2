@@ -53,6 +53,17 @@ oc expose svc/custom-jenkins --port=8080 -n pqc-support {{ openshift_creds }}
 oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhudson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
 oc adm policy add-role-to-user edit -z default -n pqc-support {{ openshift_creds }}
 
+printf "\nWaiting for jenkins pod to start"
+while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep Running
+do
+printf "\n."
+sleep 1
+done
+printf "started\n"
+
+# Update jenkins plugins
+JENKINS_POD=$(oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | awk '{print $1}')
+oc exec ${JENKINS_POD} /var/lib/jenkins/update.sh {{ openshift_creds }} -n pqc-support
 
 # Create the PQC Development Project
 oc delete all --all -n pqc-dev {{ openshift_creds }} || true
