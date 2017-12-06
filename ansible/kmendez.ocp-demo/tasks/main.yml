@@ -212,6 +212,15 @@
       ignore_errors: true
     - name: Patch che DC, set SCC privileged to true
       command: "oc patch dc/che --patch='{\"spec\": {\"template\": {\"spec\": {\"containers\": [  {\"name\":\"che\",\"securityContext\": { \"privileged\": true }}]}}}}' -n eclipse-che {{ openshift_creds }}"
-
-        #TODO - fix/configure jenkins (install blue ocean, update plugins), configure gogs
-        #https://stackoverflow.com/questions/7709993/how-can-i-update-jenkins-plugins-from-the-terminal
+    - name: Capture gogs pv location
+      shell: "oc get pvc --all-namespaces  {{ openshift_creds }} | grep gogs | awk '{print $4}'"
+      register:
+        gogs_pv
+    - name: Remove existing gogs data
+      command: rm -fr ~openshift/pvs/{{ gogs_pv.stdout }}/*
+    - name: "Extract gogs data (user: developer password: Welcome1!)"
+      unarchive:
+        src: gogs-pvc.tar.gz
+        dest: ~openshift/pvs/{{ gogs_pv.stdout }}
+    - name: Restart gogs
+      command: oc rollout latest gogs -n pqc-support {{ openshift_creds }}
