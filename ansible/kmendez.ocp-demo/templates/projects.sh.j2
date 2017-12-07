@@ -53,18 +53,6 @@ oc expose svc/custom-jenkins --port=8080 -n pqc-support {{ openshift_creds }}
 oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhudson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
 oc adm policy add-role-to-user edit -z default -n pqc-support {{ openshift_creds }}
 
-printf "\nWaiting for jenkins pod to start"
-while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep Running
-do
-printf "\n."
-sleep 2
-done
-printf "started\n"
-
-# Update jenkins plugins
-JENKINS_POD=$(oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | awk '{print $1}')
-oc exec ${JENKINS_POD} {{ openshift_creds }} -n pqc-support /var/lib/jenkins/update.sh
-
 # Create the PQC Development Project
 oc delete all --all -n pqc-dev {{ openshift_creds }} || true
 oc delete template pqc-dev -n pqc-dev {{ openshift_creds }} || true
@@ -90,4 +78,15 @@ oc new-app --template=pqc-prod -n pqc-prod {{ openshift_creds }} || true
 oc delete route pqc-prod {{ openshift_creds }} -n pqc-prod || true
 oc expose svc/pqc-prod {{ openshift_creds }} -n pqc-prod
 
+printf "\nWaiting for jenkins pod to start"
+while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep Running
+do
+printf "\n."
+sleep 2
+done
+printf "started\n"
+
+# Update jenkins plugins
+JENKINS_POD=$(oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | awk '{print $1}')
+oc exec ${JENKINS_POD} {{ openshift_creds }} -n pqc-support /var/lib/jenkins/update.sh
 
