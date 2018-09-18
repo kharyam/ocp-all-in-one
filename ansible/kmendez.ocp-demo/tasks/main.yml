@@ -145,14 +145,21 @@
         - jenkins-ocp/*        
     - name: Reload services (just in case)
       command: systemctl daemon-reload
+    - name: Download EAP Docker images
+      docker_image: 
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ eap_images }}"
     - name: Enable and start demo service
       service:
         name: demo
         state: started
         enabled: yes
+      async: 600
+      poll: 10
     - name: Attach PVC to Jenkins
       command: oc volume dc/custom-jenkins --add --name=custom-jenkins-volume-1 -t pvc --claim-size=1G --overwrite --claim-name=pvc-jenkins -n pqc-support {{ openshift_creds }}
-      ignore_errors: true
+#      ignore_errors: true
     - name: Update jenkins account
       command: "{{ item }} {{ openshift_creds }}"
       with_items:
@@ -168,7 +175,7 @@
         - oc adm policy add-scc-to-user privileged -z default -n pqc-support
         - oc adm policy add-scc-to-user anyuid  -z default -n pqc-support
       ignore_errors: true
-    - name: Pull Jenkins slave SCAP image
+    - name: Clone Jenkins slave SCAP image
       git:
         repo: 'https://github.com/kharyam/jenkins.git'
         dest: /tmp/scap
@@ -181,6 +188,7 @@
         name: docker-registry.default.svc:5000/openshift/scap-slave:latest
         tag: latest
         push: yes
+        state: present
     - name: Copy eclipse che install script
       template:
         src: eclipse-che/install.sh.j2
@@ -202,6 +210,7 @@
         - oc adm policy add-scc-to-user anyuid -z che
         - oc adm policy add-scc-to-user privileged -z default
         - oc adm policy add-scc-to-user privileged -z che
+      ignore_errors: true
     - name: Update che config map
       command: "oc patch cm/che -p '{ \"data\": {\"che-openshift-secure-routes\" : \"false\", \"che-secure-external-urls\": \"false\", \"che.docker.server_evaluation_strategy.custom.external.protocol\": \"http\"} }'"
     - name: Expose che as http

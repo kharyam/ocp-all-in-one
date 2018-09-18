@@ -8,6 +8,8 @@ etcd
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=admin
+#Installer hangs waiting for router to come up when crio is enabled...
+#openshift_use_crio=true
 openshift_master_default_subdomain=apps.192.168.124.100.xip.io
 osm_default_node_selector='region=primary'
 openshift_hosted_router_selector='region=primary'
@@ -25,6 +27,8 @@ openshift_logging_es_memory_limit=2Gi
 #openshift_hosted_logging_elasticsearch_pvc_prefix=pvc-es-
 #openshift_logging_nodeselector="region=infra"
 
+openshift_hosted_prometheus_deploy=true
+openshift_prometheus_node_selector={"region":"primary"}
 
 # Enables installation of MIQ server. Recommended for dedicated
 # clusters only. See roles/openshift_cfme/README.md for instructions

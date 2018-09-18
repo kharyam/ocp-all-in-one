@@ -5,8 +5,12 @@ openshift_user_groups: "docker, wheel"
 openshift_creds: "--config=/etc/origin/master/openshift-master.kubeconfig"
 openshift_num_pvs: 100
 jq_download: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-#eclipse_che_version: 5.21.0
-eclipse_che_version: nightly
+eap_images:
+  - registry.access.redhat.com/jboss-eap-7/eap70-openshift:latest
+  - registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.3
+eclipse_che_version: 5.22.1
+eclipse_che_branch: 5.22.x
+#eclipse_che_version: nightly
 demo_logo: |
   PPPPPPPPPPPPPPPPP        QQQQQQQQQ             CCCCCCCCCCCCC     DDDDDDDDDDDDD                                                                     
   P::::::::::::::::P     QQ:::::::::QQ        CCC::::::::::::C     D::::::::::::DDD                                                                  

@@ -1,0 +1,79 @@
+---
+# tasks file for kmendez.zabbix
+- name: Install postgresql
+  yum:
+    name: postgresql-server
+    state: present
+- name: Initialize DB
+  command: service postgresql initdb
+- name: Enable postgresql
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+- name: Enable zabbix repos
+  command: rpm -ivh http://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-release-3.0-1.el7.noarch.rpm
+- name: Enable optional rpms repo
+  command: subscription-manager repos --enable rhel-7-server-optional-rpms
+- name: Install yabbix packages
+  yum:
+    name: {{ item }}
+  with_items:
+    - php-bcmath
+    - zabbix-server-pgsql
+    - zabbix-web-pgsql
+    - httpd
+- name: Copy zabbix user creation sql script
+  template:
+    src: create_user.sql.j2
+    dest: /tmp/create_users.sql
+- name: Create postgres zabbix user
+  command: sudo -u postgres psql --file=/tmp/create_user.sql
+- name: Create zabbix database
+  command: sudo -u postgres createdb -O {{ zabbix_user }}
+- name: Create zabbix system user
+  user:
+    name: "{{ zabbix_user }}"
+    password: "{{ zabbix_password }}"
+- name: Seed the zabbix database
+  command: zcat {{ zabbx_db_creation_script }} | sudo -u zabbix psql zabbix
+- name: Add Password to zabbix_server.conf
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    state: present
+    line: DBPassword={{ zabbix_password }}
+- name: Add DBHost to zabbix_server.conf
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    state: present
+    line: "DBHost="
+- name: Start and enable zabbix
+  service:
+    name: zabbix-server
+    enabled: true
+    state: started
+- name: Configure selinux
+  command: "{{ item }}"
+  with_items:
+    - setsebool -P httpd_can_connect_zabbix on
+    - setsebool -P httpd_can_network_connect_db on
+- name: Set php timezone
+  lineinfile:
+    path: /etc/httpd/conf.d/zabbix.conf
+    state: present
+    line: "php_value date.timezone {{ zabbix_timezone }}"
+- name: Start / enable httpd
+  service:
+    name: httpd
+    state: started
+    enabled: true
+#- name: Postgres to listen on all ports
+
+    # vi /var/lib/pgsql/data/pg_hba.conf
+    # set ident to md5 on first 3 entries
+
+    # Agent
+    #rpm -ivh http://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-release-3.0-1.el7.noarch.rpm
+    # yum install zabbix zabbix-agent
+    # https://tecadmin.net/install-zabbix-agent-on-centos-rhel/#
+    # open port 10050 in iptables  /etc/sysconfig/iptables

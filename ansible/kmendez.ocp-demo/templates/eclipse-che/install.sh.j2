@@ -6,10 +6,16 @@ export OPENSHIFT_NAMESPACE_URL=eclipse-che.apps.{{ ansible_default_ipv4.address 
 export OPENSHIFT_FLAVOR=ocp
 export CHE_IMAGE_TAG={{ eclipse_che_version }}
 
-DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/init/modules/openshift/files/scripts/deploy_che.sh
-WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/init/modules/openshift/files/scripts/wait_until_che_is_available.sh
-STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/init/modules/openshift/files/scripts/replace_stacks.sh
+DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/{{ eclipse_che_branch }}/dockerfiles/init/modules/openshift/files/scripts/deploy_che.sh
+WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/{{ eclipse_che_branch }}/dockerfiles/init/modules/openshift/files/scripts/wait_until_che_is_available.sh
+STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/{{ eclipse_che_branch }}/dockerfiles/init/modules/openshift/files/scripts/replace_stacks.sh
+#CHE_OPENSHIFT=https://raw.githubusercontent.com/eclipse/che/{{ eclipse_che_branch }}/dockerfiles/init/modules/openshift/files/scripts/che-openshift.yml
+#CHE_CONFIG=https://raw.githubusercontent.com/eclipse/che/{{ eclipse_che_branch }}/dockerfiles/init/modules/openshift/files/scripts/che-config
 curl -fsSL ${DEPLOY_SCRIPT_URL} -o ./get-che.sh
 curl -fsSL ${WAIT_SCRIPT_URL} -o ./wait-che.sh
 curl -fsSL ${STACKS_SCRIPT_URL} -o ./stacks-che.sh
-bash ./get-che.sh && bash ./wait-che.sh &&  bash ./stacks-che.sh
+#curl -fsSL ${CHE_OPENSHIFT} -o ./che-openshift.yml
+#curl -fsSL ${CHE_CONFIG} -o ./che-config
+bash ./get-che.sh && bash ./wait-che.sh
+bash ./stacks-che.sh
+exit 0

@@ -29,16 +29,21 @@
       shell: "subscription-manager unsubscribe --all"
       tags: register      
     - name: Get Pool ID...
-      shell: "subscription-manager list --available --matches '*OpenShift*' | grep 'Pool ID' | head -1 | awk '{print $3}'"
+#      shell: "subscription-manager list --available --matches '*OpenShift*' | grep 'Pool ID' | head -1 | awk '{print $3}'"
+      shell: "subscription-manager list --available --matches '*Employee SKU*' | grep 'Pool ID' | head -1 | awk '{print $3}'"
       tags: register
       register: result
     - name: "Attaching to pool {{ result.stdout }}"
       shell: 'subscription-manager attach --pool={{ result.stdout }}'
       tags: register
 
+    - name: Refresh
+      shell: 'subscription-manager refresh'
+      tags: register
     - name: "Disable all the enabled RHSM repositories"
       shell: 'subscription-manager repos --disable="*"'
       tags: register
+      ignore_errors: true
     - name: "Enable OpenShift Repositories"
       shell: 'subscription-manager repos --enable={{ item }}'
       with_items: "{{ enabled_repos }}"

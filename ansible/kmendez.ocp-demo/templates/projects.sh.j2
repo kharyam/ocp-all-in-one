@@ -12,6 +12,11 @@ oc import-image jboss-eap70-openshift -n openshift --all --from=registry.access.
 oc import-image openshift/jboss-eap70-openshift:1.3 --from=registry.access.redhat.com/jboss-eap-7/eap70-openshift:1.3 --confirm -n openshift {{ openshift_creds }} || true
 
 # Create projects if they don't exist
+########
+# TODO 
+#######
+Delete and recreate entire pqc-dev project to avoid hanging binary builds
+
 oc new-project pqc-support --display-name "PQC Support Infrastructure"  {{ openshift_creds }} || true
 oc new-project pqc-dev --display-name "PQC Development Project" {{ openshift_creds }} || true
 oc new-project pqc-test --display-name "PQC Test Project" {{ openshift_creds }} || true
@@ -51,6 +56,7 @@ oc start-build custom-jenkins-build --follow --wait {{ openshift_creds }} -n pqc
 oc new-app custom-jenkins -n pqc-support {{ openshift_creds }} 
 oc expose svc/custom-jenkins --port=8080 -n pqc-support {{ openshift_creds }} 
 oc set env dc/custom-jenkins -n pqc-support {{ openshift_creds }} JAVA_OPTS=-Dhudson.model.DirectoryBrowserSupport.CSP=\"\" JAVA_GC_OPTS=-XX:MaxMetaspaceSize=256m
+oc set probe dc/custom-jenkins --readiness --failure-threshold=3 --initial-delay-seconds=3  --period-seconds=5 --timeout-seconds=10 {{ openshift_creds }} -n pqc-support --get-url=http://:8080/
 oc adm policy add-role-to-user edit -z default -n pqc-support {{ openshift_creds }}
 
 # Create the PQC Development Project
@@ -79,7 +85,7 @@ oc delete route pqc-prod {{ openshift_creds }} -n pqc-prod || true
 oc expose svc/pqc-prod {{ openshift_creds }} -n pqc-prod
 
 printf "\nWaiting for jenkins pod to start"
-while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep Running
+while ! oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | grep "1/1" 
 do
 printf "\n."
 sleep 2
@@ -88,5 +94,6 @@ printf "started\n"
 
 # Update jenkins plugins
 JENKINS_POD=$(oc get pods -n pqc-support {{ openshift_creds }} | grep custom-jenkins | grep -v build | grep -v deploy | awk '{print $1}')
+echo oc exec ${JENKINS_POD} {{ openshift_creds }} -n pqc-support /var/lib/jenkins/update.sh
 oc exec ${JENKINS_POD} {{ openshift_creds }} -n pqc-support /var/lib/jenkins/update.sh
 

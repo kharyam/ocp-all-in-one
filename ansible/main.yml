@@ -3,6 +3,7 @@
   tasks:
   - include_vars:
       file: vars.yml
+
 #  - name: "OpenShift Pre Reqs"
 #    include_role:
 #      name: kmendez.ocp-prereqs

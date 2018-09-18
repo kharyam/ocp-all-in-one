@@ -1,0 +1,6 @@
+---
+# defaults file for kmendez.zabbix
+zabbix_user: zabbix
+zabbix_password: zabbix
+zabbx_db_creation_script: /usr/share/doc/zabbix-server-pgsql-3.0.13/create.sql.gz
+zabbix_timezone: America/New_York
